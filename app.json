@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Таблетница",
+    "slug": "react_native_medicine",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/pills_192.png",
+    "scheme": "reactnativemedicine",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourname.yourapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/pills_192.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.stanhill.react_native_medicine"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/pills_192.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/pills_192.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ecc0a7e3-e36f-4038-bf03-5310eba22950"
+      }
+    }
+  }
+}
