@@ -6,19 +6,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getLocalData, saveLocalData } from "./MedicationPage";
+import { getLocalData, saveLocalData, testNotification } from "./helpers";
 import CustomInput from "./ui/CustomInput";
-
-const minuteMap = {
-  Утро: 0,
-  День: 0,
-  Вечер: 0,
-};
 
 export const SettingPage = () => {
   const [morning, setMorning] = useState(8);
   const [afternoon, setAfternoon] = useState(13);
   const [evening, setEvening] = useState(19);
+  const [morningM, setMorningM] = useState(0);
+  const [afternoonM, setAfternoonM] = useState(0);
+  const [eveningM, setEveningM] = useState(0);
+  const [testFunction, setTestFunction] = useState(false);
 
   useEffect(() => {
     getLocalData("hourMap").then((item) => {
@@ -26,12 +24,19 @@ export const SettingPage = () => {
       setAfternoon(item.День);
       setEvening(item.Вечер);
     });
+    getLocalData("hourMapM").then((item) => {
+      setMorningM(item.Утро);
+      setAfternoonM(item.День);
+      setEveningM(item.Вечер);
+    });
   }, []);
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.centered}>
-        <Text style={styles.header}>Настройки</Text>
+        <TouchableOpacity onLongPress={() => setTestFunction(!testFunction)}>
+          <Text style={styles.header}>Настройки</Text>
+        </TouchableOpacity>
         <Text style={styles.text}>Задать время для уведомлений</Text>
         <View style={styles.modalContainer}>
           <CustomInput
@@ -55,18 +60,57 @@ export const SettingPage = () => {
             placeholder="19"
             keyboardType="numeric"
           />
+          {testFunction && (
+            <>
+              {" "}
+              <CustomInput
+                name="Уведомления утром"
+                value={morningM}
+                onChange={setMorningM}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+              <CustomInput
+                name="Уведомления в обед"
+                value={afternoonM}
+                onChange={setAfternoonM}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+              <CustomInput
+                name="Уведомления вечером"
+                value={eveningM}
+                onChange={setEveningM}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+            </>
+          )}
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={() =>
+            onPress={() => {
               saveLocalData("hourMap", {
                 Утро: morning,
                 День: afternoon,
                 Вечер: evening,
-              })
-            }
+              });
+              saveLocalData("hourMapM", {
+                Утро: morningM,
+                День: afternoonM,
+                Вечер: eveningM,
+              });
+            }}
           >
             <Text style={styles.closeButtonText}>Сохранить</Text>
           </TouchableOpacity>
+          {testFunction && (
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={testNotification}
+            >
+              <Text>Test</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>

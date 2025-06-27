@@ -15,31 +15,9 @@ import {
 import { Calendar } from "react-native-calendars";
 import uuid from "react-native-uuid";
 import CustomInput from "../components/ui/CustomInput";
+import { saveLocalData } from "./helpers";
 
 const timeOrder = { Утро: 1, День: 2, Вечер: 3 };
-
-export const saveLocalData = async (key, data) => {
-  try {
-    await AsyncStorage.setItem(key, JSON.stringify(data));
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-// export const getLocalData = async (key) => await AsyncStorage.getItem(key);
-
-export const getLocalData = async (key) => {
-  try {
-    const saved = await AsyncStorage.getItem(key);
-    const parsedData = await JSON.parse(saved);
-
-    if (parsedData) {
-      return parsedData;
-    }
-  } catch (e) {
-    console.log("Ошибка загрузки:", e);
-  }
-};
 
 const MedicationScreen = () => {
   const [selectedDate, setSelectedDate] = useState(
@@ -50,9 +28,14 @@ const MedicationScreen = () => {
   const [newMedQuantity, setNewMedQuantity] = useState("1 таблетка");
   const [medDuration, setMedDuration] = useState(1);
   const [hourMap, setHourMap] = useState({
-    Утро: 8,
+    Утро: 9,
     День: 13,
-    Вечер: 19,
+    Вечер: 18,
+  });
+  const [minuteMap, setMinuteMap] = useState({
+    Утро: 0,
+    День: 0,
+    Вечер: 0,
   });
 
   const [calendarVisible, setCalendarVisible] = useState(false);
@@ -76,28 +59,20 @@ const MedicationScreen = () => {
   }, {});
 
   const scheduleNotification = async (title, dateStr, timeLabel) => {
-    const minuteMap = {
-      Утро: 0,
-      День: 0,
-      Вечер: 0,
-    };
-
-    const hour = hourMap[timeLabel] || 9;
-    const minute = minuteMap[timeLabel] || 0;
-
+    const hour = hourMap[timeLabel];
+    const minute = minuteMap[timeLabel];
     const triggerDate = new Date(
       `${dateStr}T${String(hour).padStart(2, "0")}:${String(minute).padStart(
         2,
         "0"
       )}:00`
     );
-
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "💊 Напоминание о приёме",
         body: `Пора принять: ${title} (${timeLabel})`,
       },
-      trigger: triggerDate,
+      trigger: { type: "date", date: triggerDate }, // fire immediately
     });
   };
 
@@ -203,14 +178,16 @@ const MedicationScreen = () => {
     loadMeds();
 
     const registerNotifications = async () => {
-      const { status } = await Notifications.getPermissionsAsync();
+      let { status } = await Notifications.getPermissionsAsync();
       if (status !== "granted") {
-        await Notifications.requestPermissionsAsync();
+        const request = await Notifications.requestPermissionsAsync();
+        status = request.status;
       }
+      if (status !== "granted") return; // Exit if denied
 
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
-          shouldShowAlert: true,
+          shouldShowBanner: true,
           shouldPlaySound: true,
           shouldSetBadge: false,
         }),
@@ -229,8 +206,6 @@ const MedicationScreen = () => {
   };
 
   useEffect(() => {
-    getLocalData("hourMap").then((hours) => hours && setHourMap(hours));
-
     saveLocalData("@medsByDate", medsByDate);
   }, [medsByDate]);
 

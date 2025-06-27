@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.yourname.yourapp"
     },
     "android": {
+      "permissions": ["RECEIVE_BOOT_COMPLETED", "SCHEDULE_EXACT_ALARM"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/pills_192.png",
         "backgroundColor": "#ffffff"
