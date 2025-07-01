@@ -1,3 +1,7 @@
+import {
+  hourNotification,
+  minuteNotification,
+} from "@/store/slices/notificationSlice";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -6,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch } from "react-redux";
 import { getLocalData, saveLocalData, testNotification } from "./helpers";
 import CustomInput from "./ui/CustomInput";
 
@@ -18,13 +23,15 @@ export const SettingPage = () => {
   const [eveningM, setEveningM] = useState(0);
   const [testFunction, setTestFunction] = useState(false);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     getLocalData("hourMap").then((item) => {
       setMorning(item.Утро);
       setAfternoon(item.День);
       setEvening(item.Вечер);
     });
-    getLocalData("hourMapM").then((item) => {
+    getLocalData("minuteMap").then((item) => {
       setMorningM(item.Утро);
       setAfternoonM(item.День);
       setEveningM(item.Вечер);
@@ -37,55 +44,66 @@ export const SettingPage = () => {
         <TouchableOpacity onLongPress={() => setTestFunction(!testFunction)}>
           <Text style={styles.header}>Настройки</Text>
         </TouchableOpacity>
-        <Text style={styles.text}>Задать время для уведомлений</Text>
+        {/* <Text style={styles.text}>Задать время для уведомлений</Text> */}
         <View style={styles.modalContainer}>
-          <CustomInput
-            name="Уведомления утром"
-            value={morning}
-            onChange={setMorning}
-            placeholder="8"
-            keyboardType="numeric"
-          />
-          <CustomInput
-            name="Уведомления в обед"
-            value={afternoon}
-            onChange={setAfternoon}
-            placeholder="13"
-            keyboardType="numeric"
-          />
-          <CustomInput
-            name="Уведомления вечером"
-            value={evening}
-            onChange={setEvening}
-            placeholder="19"
-            keyboardType="numeric"
-          />
-          {testFunction && (
-            <>
-              {" "}
-              <CustomInput
-                name="Уведомления утром"
-                value={morningM}
-                onChange={setMorningM}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-              <CustomInput
-                name="Уведомления в обед"
-                value={afternoonM}
-                onChange={setAfternoonM}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-              <CustomInput
-                name="Уведомления вечером"
-                value={eveningM}
-                onChange={setEveningM}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-            </>
-          )}
+          <Text style={styles.alter_text}>
+            Задать время для уведомлений утром
+          </Text>
+          <View style={styles.row}>
+            <CustomInput
+              name="Часов"
+              value={morning}
+              onChange={setMorning}
+              placeholder="Часов"
+              keyboardType="numeric"
+            />
+            <CustomInput
+              name="Минут"
+              value={morningM}
+              onChange={setMorningM}
+              placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+          <Text style={styles.alter_text}>
+            Задать время для уведомлений в обед
+          </Text>
+          <View style={styles.row}>
+            <CustomInput
+              name="Часов"
+              value={afternoon}
+              onChange={setAfternoon}
+              placeholder="Часов"
+              keyboardType="numeric"
+            />
+            <CustomInput
+              name="Минут"
+              value={afternoonM}
+              onChange={setAfternoonM}
+              placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+          <Text style={styles.alter_text}>
+            Задать время для уведомлений вечером
+          </Text>
+          <View style={styles.row}>
+            <CustomInput
+              name="Часов"
+              value={evening}
+              onChange={setEvening}
+              placeholder="Часов"
+              keyboardType="numeric"
+            />
+            <CustomInput
+              name="Минут"
+              value={eveningM}
+              onChange={setEveningM}
+              placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => {
@@ -94,11 +112,25 @@ export const SettingPage = () => {
                 День: afternoon,
                 Вечер: evening,
               });
-              saveLocalData("hourMapM", {
+              saveLocalData("minuteMap", {
                 Утро: morningM,
                 День: afternoonM,
                 Вечер: eveningM,
               });
+              dispatch(
+                hourNotification({
+                  Утро: morning,
+                  День: afternoon,
+                  Вечер: evening,
+                })
+              );
+              dispatch(
+                minuteNotification({
+                  Утро: morningM,
+                  День: afternoonM,
+                  Вечер: eveningM,
+                })
+              );
             }}
           >
             <Text style={styles.closeButtonText}>Сохранить</Text>
@@ -119,6 +151,11 @@ export const SettingPage = () => {
 
 const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    gap: 12,
+  },
   container: {
     flex: 1,
     backgroundColor: "#F4F6F8",
@@ -133,6 +170,12 @@ const styles = StyleSheet.create({
     color: "#263238",
   },
   text: { fontSize: 22 },
+  alter_text: {
+    fontSize: 18,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
   modalContainer: {
     backgroundColor: "white",
     borderRadius: 12,

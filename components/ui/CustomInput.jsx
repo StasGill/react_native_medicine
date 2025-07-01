@@ -1,4 +1,4 @@
-import { Text, TextInput } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
 export default function CustomInput({
   name,
@@ -8,7 +8,7 @@ export default function CustomInput({
   keyboardType,
 }) {
   return (
-    <>
+    <View>
       <Text style={{ marginBottom: 6 }}>{name}</Text>
       <TextInput
         placeholder={placeholder}
@@ -23,6 +23,6 @@ export default function CustomInput({
           marginBottom: 12,
         }}
       />
-    </>
+    </View>
   );
 }

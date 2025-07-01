@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +15,7 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import uuid from "react-native-uuid";
+import { useSelector } from "react-redux";
 import CustomInput from "../components/ui/CustomInput";
 import { saveLocalData } from "./helpers";
 
@@ -47,6 +49,14 @@ const MedicationScreen = () => {
   const [newMedTimes, setNewMedTimes] = useState(["Утро"]);
   const [medsByDate, setMedsByDate] = useState({});
 
+  //=======Store
+  const meds = useSelector((state) => state.notification);
+
+  // const dispatch = useDispatch();
+  //  dispatch(addMedicine({ id: "1", title: "Aspirin", taken: false }));
+
+  //=======Store
+
   const markedDates = Object.keys(medsByDate).reduce((acc, date) => {
     if (medsByDate[date] && medsByDate[date].length > 0) {
       acc[date] = {
@@ -59,9 +69,19 @@ const MedicationScreen = () => {
   }, {});
 
   const scheduleNotification = async (title, dateStr, timeLabel) => {
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("emergency-channel", {
+        name: "Emergency Alerts",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: Platform.OS === "ios" ? "emergency" : "emergency.wav", // must match registered sound
+      });
+    }
+
     const hour = hourMap[timeLabel];
     const minute = minuteMap[timeLabel];
-    const triggerDate = new Date(
+    let triggerDate;
+
+    triggerDate = new Date(
       `${dateStr}T${String(hour).padStart(2, "0")}:${String(minute).padStart(
         2,
         "0"
@@ -71,8 +91,13 @@ const MedicationScreen = () => {
       content: {
         title: "💊 Напоминание о приёме",
         body: `Пора принять: ${title} (${timeLabel})`,
+        sound: "emergency.wav",
       },
-      trigger: { type: "date", date: triggerDate }, // fire immediately
+      trigger: {
+        type: "date",
+        date: triggerDate,
+        channelId: Platform.OS === "android" ? "emergency-channel" : undefined,
+      },
     });
   };
 
@@ -167,9 +192,17 @@ const MedicationScreen = () => {
     const loadMeds = async () => {
       try {
         const saved = await AsyncStorage.getItem("@medsByDate");
+        const hoursL = await AsyncStorage.getItem("hourMap");
+        const minuteL = await AsyncStorage.getItem("minuteMap");
 
         if (saved) {
           setMedsByDate(JSON.parse(saved));
+        }
+        if (hoursL) {
+          setHourMap(JSON.parse(hoursL));
+        }
+        if (minuteL) {
+          setMinuteMap(JSON.parse(minuteL));
         }
       } catch (e) {
         console.log("Ошибка загрузки:", e);
@@ -208,6 +241,15 @@ const MedicationScreen = () => {
   useEffect(() => {
     saveLocalData("@medsByDate", medsByDate);
   }, [medsByDate]);
+
+  useEffect(() => {
+    if (meds?.hourNotification) {
+      setHourMap(meds?.hourNotification);
+    }
+    if (meds?.minuteNotification) {
+      setMinuteMap(meds?.minuteNotification);
+    }
+  }, [meds]);
 
   return (
     <ScrollView style={styles.container}>
