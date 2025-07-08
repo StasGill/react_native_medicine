@@ -15,9 +15,10 @@ export const getLocalData = async (key) => {
   }
 };
 
-export const saveLocalData = async (key, data) => {
+export const saveToLocalData = async (key, data) => {
   try {
-    await AsyncStorage.setItem(key, JSON.stringify(data));
+    const stringifyData = JSON.stringify(data);
+    await AsyncStorage.setItem(key, stringifyData);
   } catch (error) {
     console.log(error);
   }

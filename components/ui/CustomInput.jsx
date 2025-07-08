@@ -6,6 +6,7 @@ export default function CustomInput({
   onChange,
   placeholder,
   keyboardType,
+  styles,
 }) {
   return (
     <View>
@@ -21,6 +22,7 @@ export default function CustomInput({
           padding: 8,
           borderRadius: 8,
           marginBottom: 12,
+          ...styles,
         }}
       />
     </View>

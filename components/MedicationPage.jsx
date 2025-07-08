@@ -49,13 +49,7 @@ const MedicationScreen = () => {
   const [newMedTimes, setNewMedTimes] = useState(["Утро"]);
   const [medsByDate, setMedsByDate] = useState({});
 
-  //=======Store
   const meds = useSelector((state) => state.notification);
-
-  // const dispatch = useDispatch();
-  //  dispatch(addMedicine({ id: "1", title: "Aspirin", taken: false }));
-
-  //=======Store
 
   const markedDates = Object.keys(medsByDate).reduce((acc, date) => {
     if (medsByDate[date] && medsByDate[date].length > 0) {
@@ -420,49 +414,53 @@ const MedicationScreen = () => {
           </View>
         </View>
       </Modal>
-
-      {medsByDate[selectedDate]
-        ?.slice()
-        .sort((a, b) => {
-          return timeOrder[a.times] - timeOrder[b.times];
-        })
-        ?.map((item) => (
-          <View
-            key={item.id}
-            style={[
-              styles.card,
-              item.taken && styles.cardTaken, // применяем зелёный стиль, если принято
-            ]}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setSelectedMed(item);
-                setEditedName(item.name);
-                setEditedTime(item.time);
-                setSelectedMed(item);
-              }}
-              activeOpacity={0.8}
-              style={{ flex: 1 }}
+      <ScrollView style={styles.test_container}>
+        {medsByDate[selectedDate]
+          ?.slice()
+          .sort((a, b) => {
+            return timeOrder[a.times] - timeOrder[b.times];
+          })
+          ?.map((item) => (
+            <View
+              key={item.id}
+              style={[
+                styles.card,
+                item.taken && styles.cardTaken, // применяем зелёный стиль, если принято
+              ]}
             >
-              <View style={styles.info}>
-                <Text style={[styles.time, item.taken && { color: "#C8E6C9" }]}>
-                  {item.times} : {item.quantity}
-                </Text>
-                <Text style={[styles.name, item.taken && { color: "#ffffff" }]}>
-                  {item.name}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => toggleTaken(item.id)}>
-              <Ionicons
-                name={item.taken ? "checkmark-circle" : "ellipse-outline"}
-                size={28}
-                color={item.taken ? "#FFFFFF" : "#B0BEC5"}
-              />
-            </TouchableOpacity>
-          </View>
-        ))}
-
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedMed(item);
+                  setEditedName(item.name);
+                  setEditedTime(item.time);
+                  setSelectedMed(item);
+                }}
+                activeOpacity={0.8}
+                style={{ flex: 1 }}
+              >
+                <View style={styles.info}>
+                  <Text
+                    style={[styles.time, item.taken && { color: "#C8E6C9" }]}
+                  >
+                    {item.times} : {item.quantity}
+                  </Text>
+                  <Text
+                    style={[styles.name, item.taken && { color: "#ffffff" }]}
+                  >
+                    {item.name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => toggleTaken(item.id)}>
+                <Ionicons
+                  name={item.taken ? "checkmark-circle" : "ellipse-outline"}
+                  size={28}
+                  color={item.taken ? "#FFFFFF" : "#B0BEC5"}
+                />
+              </TouchableOpacity>
+            </View>
+          ))}
+      </ScrollView>
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setAddModalVisible(true)}
